@@ -46,12 +46,13 @@ class LogParser
         if (!preg_match($this->pcreFormat, $line, $matches)) {
             throw new FormatException($line);
         }
-        $entry = new \stdClass();
-        foreach (array_filter(array_keys($matches), 'is_string') as $key) {
-            if ('time' === $key && true !== $stamp = strtotime($matches[$key])) {
-                $entry->stamp = $stamp;
+        $entry = array_filter(array_keys($matches), 'is_string');
+        if (isset($entry["time"])) {
+            $stamp = strtotime($entry["time"]);
+            if ($stamp === false) {
+                throw new FormatException($line);
             }
-            $entry->{$key} = $matches[$key];
+            $entry["stamp"] = $stamp;
         }
 
         return $entry;
